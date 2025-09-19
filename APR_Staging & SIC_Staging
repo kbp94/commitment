@@ -1,0 +1,19 @@
+// 1) Apply the mapping
+Renamed = fnApplyColumnMap(PreviousStep),
+
+// 2) Add CallType
+WithCallType = Table.AddColumn(Renamed, "CallType", each "APR", type text),  // use "SIC" in the SIC_Staging query
+
+// 3) Apply types (adjust as needed)
+Typed = Table.TransformColumnTypes(
+    WithCallType,
+    {
+        {"Area", type text},
+        {"District", type text},
+        {"Comments", type text},
+        {"DateOfCall", type datetime},        // or type date if you prefer
+        {"DateOfFollowUp", type datetime},    // or type date
+        {"CallType", type text}
+    },
+    "en-US" // set your locale if needed
+)
