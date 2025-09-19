@@ -1,37 +1,46 @@
 let
   Source = APR,
-  V1 = Table.ExpandTableColumn(Source, "Versions",
+  V1 = Table.ExpandTableColumn(Source,"Versions",
       {"VersionId","VersionLabel","Modified","Editor","FieldValuesAsText"},
       {"VersionId","VersionLabel","VersionModified","EditorRec","FieldsRec"}),
 
-  V2 = Table.ExpandRecordColumn(V1, "EditorRec", {"Title","Email"}, {"EditorName","EditorEmail"}),
+  V2 = Table.ExpandRecordColumn(V1,"EditorRec",{"Title","Email"},{"EditorName","EditorEmail"}),
 
-  V3 = Table.ExpandRecordColumn(
-        V2, "FieldsRec",
-        {"DateofCall","DateofFollowUp","DueDate","Area","District","Office","WhoSpoke?","PersonSpeakingforSite",
-         "Commitments","APRIndicator","ServiceIndicator","ServiceIndicato","StatusNew","NEW_LastEscalated","NEW_EscalationTier","MPOO"},
-        {"DateofCall","DateofFollowUp","DueDate","Area","District","Office","WhoSpoke?","PersonSpeakingforSite",
-         "Commitments","APRIndicator","ServiceIndicator","ServiceIndicato","StatusNew","NEW_LastEscalated","NEW_EscalationTier","MPOO"}),
+  // Drop columns that will be re-created from FieldsRec
+  Drop = Table.RemoveColumns(V2, {
+      "DateofCall","DateofFollowUp","DueDate","Area","District","Office",
+      "WhoSpoke?","PersonSpeakingforSite","Commitments","APRIndicator",
+      "ServiceIndicator","ServiceIndicato","StatusNew","NEW_LastEscalated",
+      "NEW_EscalationTier","MPOO"
+  }, MissingField.Ignore),
 
-  Ren = Table.RenameColumns(V3, {
-        {"DateofCall","DateOfCall"},{"DateofFollowUp","DateOfFollowUp"},
-        {"DueDate","CommitmentDate"},{"StatusNew","Status_Switch"},
-        {"NEW_LastEscalated","LastEscalated"},{"NEW_EscalationTier","Tier"},{"MPOO","MPOOView"}}, MissingField.Ignore),
+  V3 = Table.ExpandRecordColumn(Drop,"FieldsRec",
+      {"DateofCall","DateofFollowUp","DueDate","Area","District","Office","WhoSpoke?","PersonSpeakingforSite",
+       "Commitments","APRIndicator","ServiceIndicator","ServiceIndicato","StatusNew","NEW_LastEscalated","NEW_EscalationTier","MPOO"},
+      {"DateofCall","DateofFollowUp","DueDate","Area","District","Office","WhoSpoke?","PersonSpeakingforSite",
+       "Commitments","APRIndicator","ServiceIndicator","ServiceIndicato","StatusNew","NEW_LastEscalated","NEW_EscalationTier","MPOO"}),
 
-  AddUnit = Table.AddColumn(Ren, "Unit", each if [Office] <> null then [Office] else null),
-  AddWho  = Table.AddColumn(AddUnit, "WhoSpoke",
+  Ren = Table.RenameColumns(V3,{
+      {"DateofCall","DateOfCall"},{"DateofFollowUp","DateOfFollowUp"},
+      {"DueDate","CommitmentDate"},{"StatusNew","Status_Switch"},
+      {"NEW_LastEscalated","LastEscalated"},{"NEW_EscalationTier","Tier"},{"MPOO","MPOOView"}
+  }, MissingField.Ignore),
+
+  AddUnit = Table.AddColumn(Ren,"Unit", each if [Office] <> null then [Office] else null),
+  AddWho  = Table.AddColumn(AddUnit,"WhoSpoke",
               each let w = try Record.Field(_, "WhoSpoke?") otherwise null,
                        p = try [PersonSpeakingforSite] otherwise null
                    in if w <> null and Text.From(w) <> "" then w else p),
-  AddSvc  = Table.AddColumn(AddWho, "ServiceIndicator_std",
-              each if Text.FromNullable([ServiceIndicator]) <> "" then [ServiceIndicator]
-                   else if Text.FromNullable([ServiceIndicato]) <> "" then [ServiceIndicato] else null),
-  AddInd  = Table.AddColumn(AddSvc, "IndicatorUnified",
-              each if Text.FromNullable([APRIndicator]) <> "" then [APRIndicator] else null),
+  AddSvc  = Table.AddColumn(AddWho,"ServiceIndicator_std",
+              each if Text.FromNullable([ServiceIndicator])<>"" then [ServiceIndicator]
+                   else if Text.FromNullable([ServiceIndicato])<>"" then [ServiceIndicato] else null),
+  AddInd  = Table.AddColumn(AddSvc,"IndicatorUnified",
+              each if Text.FromNullable([APRIndicator])<>"" then [APRIndicator] else null),
 
-  Types = Table.TransformColumnTypes(AddInd, {
-        {"VersionModified", type datetimezone},
-        {"DateOfCall", type datetime},{"CommitmentDate", type datetime},{"DateOfFollowUp", type datetime}}, "en-US"),
-  Final = Table.AddColumn(Types, "ListType", each "APR", type text)
+  Types = Table.TransformColumnTypes(AddInd,{
+      {"VersionModified", type datetimezone},
+      {"DateOfCall", type datetime},{"CommitmentDate", type datetime},{"DateOfFollowUp", type datetime}
+  }, "en-US"),
+  Final = Table.AddColumn(Types,"ListType", each "APR", type text)
 in
   Final
