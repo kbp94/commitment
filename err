@@ -1,0 +1,6 @@
+DataSource.Error: We couldn't parse OData response result.  Error: A value without a type name was found and no expected type is available. When the model is specified, each value in the payload must have a type which can be either specified in the payload, explicitly by the caller or implicitly inferred from the parent value.
+Details:
+    DataSourceKind=SharePoint
+    DataSourcePath=https://usps365.sharepoint.com/sites/FOSAppResultsWarehouse
+    DataSourceKind.2=SharePoint
+    DataSourcePath.2=https://usps365.sharepoint.com/sites/FOSAppResultsWarehouse/_api/Web/Lists(guid'8512355f-5c42-4aab-ab94-0a15a5cb14dc')/Items(59)/Versions
