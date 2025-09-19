@@ -1,0 +1,22 @@
+(let
+    Source as table,
+    optionalMapping as nullable table
+) as table =>
+let
+    // Use provided mapping table (ColumnMappings) if none passed
+    MappingTable = if optionalMapping <> null then optionalMapping else ColumnMappings,
+
+    // Build a record: normalized FromName -> ToName
+    Normalized = Table.TransformColumns(
+        MappingTable,
+        {{"FromName", each Text.Lower(Text.Trim(_)), type text}}
+    ),
+    MapRecord = Record.FromTable(Table.RenameColumns(Normalized, {{"FromName","Name"}})[[Name=Key, ToName=Value]]),
+
+    // Safe renamer: if a name isn't in the map, keep it as-is
+    Renamed = Table.TransformColumnNames(
+        Source,
+        each Record.FieldOrDefault(MapRecord, Text.Lower(Text.Trim(_)), _)
+    )
+in
+    Renamed)
