@@ -1,8 +1,5 @@
-DataSource.Error: Microsoft.Mashup.Engine1.Library.Resources.HttpResource: Request failed: 
-OData Version: 3 and 4, Error: The remote server returned an error: (400) Bad Request. (The expression "Versions($select=VersionId,VersionLabel,Modified,Editor,FieldValuesAsText)" is not valid.)
-OData Version: 4, Error: The remote server returned an error: (400) Bad Request. (The expression "Versions($select=VersionId,VersionLabel,Modified,Editor,FieldValuesAsText)" is not valid.)
-OData Version: 3, Error: The remote server returned an error: (400) Bad Request. (The expression "Versions($select=VersionId,VersionLabel,Modified,Editor,FieldValuesAsText)" is not valid.)
+DataSource.Error: Value cannot be null.
+Parameter name: entitySet
 Details:
     DataSourceKind=OData
     DataSourcePath=https://usps365.sharepoint.com/sites/FOSAppResultsWarehouse/_api/web/lists/GetByTitle('APR%20Call')/items
-    sprequestguid=485dc7a1-70da-9000-ba27-f672092c06a5, 485dc7a1-e0e1-a000-4416-3212569a19c4, 485dc7a1-b0e8-a000-3173-cf4314d5b99a
