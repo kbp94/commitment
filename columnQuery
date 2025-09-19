@@ -4,3 +4,17 @@ let
     Tag    = Table.AddColumn(Keep, "SourceList", each "APR", type text)
 in
     Tag
+
+let
+    Schema = Table.Schema(SIC),
+    Keep   = Table.SelectColumns(Schema, {"Name","Kind","TypeName","IsNullable"}),
+    Tag    = Table.AddColumn(Keep, "SourceList", each "SIC", type text)
+in
+    Tag
+
+
+let
+    Combined = Table.Combine({APR_Schema, SIC_Schema}),
+    Sorted   = Table.Sort(Combined, {{"Name", Order.Ascending},{"SourceList", Order.Ascending}})
+in
+    Sorted
