@@ -1,0 +1,11 @@
+Total Commitments = COUNTROWS('Calls (Current Combined)')
+
+Overdue Commitments =
+CALCULATE(
+    COUNTROWS('Calls (Current Combined)'),
+    FILTER('Calls (Current Combined)', 'Calls (Current Combined)'[DaysRemaining] < 0)
+)
+
+On-Time Rate % =
+VAR total = [Total Commitments]
+RETURN IF(total = 0, BLANK(), DIVIDE(total - [Overdue Commitments], total))
