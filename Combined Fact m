@@ -1,15 +1,4 @@
 let
-    Combined = Table.Combine({#"APR Normalized", #"SIC Normalized"}),
-    FinalTypes = Table.TransformColumnTypes(
-        Combined,
-        {
-            {"DateOfCall", type datetime},
-            {"CommitmentDate", type datetime},
-            {"DateOfFollowUp", type datetime},
-            {"Created", type datetime},
-            {"Modified", type datetime}
-        },
-        "en-US"
-    )
+  Combined = Table.Combine({#"APR Normalized", #"SIC Normalized"})
 in
-    FinalTypes
+  Combined
