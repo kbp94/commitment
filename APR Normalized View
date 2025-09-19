@@ -1,128 +1,35 @@
 let
-    // CHANGE THIS if your source query name differs:
-    Source = APR_Call,
-
-    // Keep business-relevant fields that exist in your file
-    KeepCols = Table.SelectColumns(
-        Source,
-        {
-            "Id",
-            "DateofCall", "DateofFollowUp",
-            "Area", "District", "Office", "Unit",
-            "WhoSpoke?", "PersonSpeakingforSite",
-            "Commitments", "Comments", "Description",
-            "APRIndicator", "ServiceIndicator", "ServiceIndicato",
-            "DueDate",
-            "Notes", "EvidenceLink",
-            "StatusNew", "NEW_LastEscalated", "NEW_EscalationTier",
-            "WhoFollowedUpId", "WhoFollowedUpStringId",
-            "CallType",
-            "WasCommitmentAddressed", "ActionTaken", "EscalatedWas",
-            "MPOO",
-            "EmailSent", "SendBackNotes", "SentBack",
-            "Created", "Modified"
-        },
-        MissingField.Ignore
-    ),
-
-    // Rename to align with SIC schema
-    Renamed = Table.RenameColumns(
-        KeepCols,
-        {
-            {"DateofCall","DateOfCall"},
-            {"DateofFollowUp","DateOfFollowUp"},
-            {"DueDate","CommitmentDate"},
-            {"StatusNew","Status_Switch"},
-            {"NEW_LastEscalated","LastEscalated"},
-            {"NEW_EscalationTier","Tier"},
-            {"MPOO","MPOOView"}
-        },
-        MissingField.Ignore
-    ),
-
-    // Coalesce Unit (APR has Office; use Unit if present else Office)
-    AddUnitStd = Table.AddColumn(
-        Renamed, "Unit_std",
-        each if Record.HasFields(_, "Unit") and [Unit] <> null then [Unit] else [Office]
-    ),
-
-    // Coalesce WhoSpoke (APR has "WhoSpoke?" and sometimes PersonSpeakingforSite)
-    AddWhoSpoke = Table.AddColumn(
-        AddUnitStd, "WhoSpoke",
-        each if Record.HasFields(_, "WhoSpoke?") and Text.FromNullable(Record.Field(_, "WhoSpoke?")) <> "" 
-             then Record.Field(_, "WhoSpoke?")
-             else [PersonSpeakingforSite]
-    ),
-
-    // Service Indicator (use ServiceIndicator, else ServiceIndicato if that truncated field appears)
-    AddService = Table.AddColumn(
-        AddWhoSpoke, "ServiceIndicator_std",
-        each if Record.HasFields(_, "ServiceIndicator") and Text.FromNullable([ServiceIndicator]) <> "" 
-             then [ServiceIndicator]
-             else if Record.HasFields(_, "ServiceIndicato") and Text.FromNullable([ServiceIndicato]) <> "" 
-             then [ServiceIndicato]
-             else null
-    ),
-
-    // Indicator unified (APR uses APRIndicator primarily)
-    AddIndicatorUnified = Table.AddColumn(
-        AddService, "IndicatorUnified",
-        each if Record.HasFields(_, "APRIndicator") and Text.FromNullable([APRIndicator]) <> "" 
-             then [APRIndicator]
-             else null
-    ),
-
-    // Types
-    Typed = Table.TransformColumnTypes(
-        AddIndicatorUnified,
-        {
-            {"Id", Int64.Type},
-            {"DateOfCall", type datetime},
-            {"CommitmentDate", type datetime},
-            {"DateOfFollowUp", type datetime},
-            {"Area", type text},
-            {"District", type text},
-            {"Unit_std", type text},
-            {"WhoSpoke", type text},
-            {"Commitments", type text},
-            {"IndicatorUnified", type text},
-            {"ServiceIndicator_std", type text},
-            {"ActionTaken", type text},
-            {"Tier", type text},
-            {"LastEscalated", type text},
-            {"Status_Switch", type text},
-            {"MPOOView", type text},
-            {"Created", type datetime},
-            {"Modified", type datetime}
-        },
-        "en-US"
-    ),
-
-    // Final schema aligned with SIC
-    FinalSelect = Table.SelectColumns(
-        Typed,
-        {
-            "Id","DateOfCall","CommitmentDate","DateOfFollowUp",
-            "Area","District","Unit_std",
-            "WhoSpoke","Commitments",
-            "IndicatorUnified","ServiceIndicator_std",
-            "ActionTaken","Tier","Status_Switch","LastEscalated",
-            "MPOOView",
-            "Created","Modified"
-        },
-        MissingField.Ignore
-    ),
-
-    // Normalize final column names
-    RenamedFinal = Table.RenameColumns(
-        FinalSelect,
-        {
-            {"Unit_std","Unit"},
-            {"ServiceIndicator_std","ServiceIndicator"}
-        },
-        MissingField.Ignore
-    ),
-
-    WithListType = Table.AddColumn(RenamedFinal, "ListType", each "APR", type text)
+  Source = APR,
+  Keep = Table.SelectColumns(Source,{
+    "Id","DateofCall","DateofFollowUp","Area","District","Office","Unit",
+    "WhoSpoke?","PersonSpeakingforSite","Commitments",
+    "APRIndicator","ServiceIndicator","ServiceIndicato",
+    "DueDate","StatusNew","NEW_LastEscalated","NEW_EscalationTier",
+    "ActionTaken","MPOO","Created","Modified"
+  }, MissingField.Ignore),
+  Ren = Table.RenameColumns(Keep,{
+    {"DateofCall","DateOfCall"},{"DateofFollowUp","DateOfFollowUp"},
+    {"DueDate","CommitmentDate"},{"StatusNew","Status_Switch"},
+    {"NEW_LastEscalated","LastEscalated"},{"NEW_EscalationTier","Tier"},
+    {"MPOO","MPOOView"}
+  }, MissingField.Ignore),
+  AddUnit = Table.AddColumn(Ren,"Unit", each if Record.HasFields(_, "Unit") and [Unit]<>null then [Unit] else [Office]),
+  AddWho  = Table.AddColumn(AddUnit,"WhoSpoke", each if Record.HasFields(_, "WhoSpoke?") and Text.FromNullable(Record.Field(_, "WhoSpoke?"))<>"" then Record.Field(_, "WhoSpoke?") else [PersonSpeakingforSite]),
+  AddSvc  = Table.AddColumn(AddWho,"ServiceIndicator", each if Record.HasFields(_, "ServiceIndicator") and Text.FromNullable([ServiceIndicator])<>"" then [ServiceIndicator] else if Record.HasFields(_, "ServiceIndicato") and Text.FromNullable([ServiceIndicato])<>"" then [ServiceIndicato] else null),
+  AddInd  = Table.AddColumn(AddSvc,"IndicatorUnified", each if Text.FromNullable([APRIndicator])<>"" then [APRIndicator] else null),
+  Select  = Table.SelectColumns(AddInd,{
+    "Id","DateOfCall","CommitmentDate","DateOfFollowUp",
+    "Area","District","Unit","WhoSpoke","Commitments",
+    "IndicatorUnified","ServiceIndicator",
+    "Tier","LastEscalated","Status_Switch","ActionTaken","MPOOView",
+    "Created","Modified"
+  }, MissingField.Ignore),
+  Types = Table.TransformColumnTypes(Select,{
+    {"Id",Int64.Type},{"DateOfCall",type datetime},{"CommitmentDate",type datetime},{"DateOfFollowUp",type datetime},
+    {"Area",type text},{"District",type text},{"Unit",type text},{"WhoSpoke",type text},{"Commitments",type text},
+    {"IndicatorUnified",type text},{"ServiceIndicator",type text},{"Tier",type text},{"LastEscalated",type text},
+    {"Status_Switch",type text},{"ActionTaken",type text},{"MPOOView",type text},{"Created",type datetime},{"Modified",type datetime}
+  }),
+  WithType = Table.AddColumn(Types,"ListType", each "APR", type text)
 in
-    WithListType
+  WithType
