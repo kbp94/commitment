@@ -1,134 +1,103 @@
 let
-    Source = #"SIC Call",
+    Source = SIC_Call,
 
+    // Keep only the useful business fields (ignore system junk like GUID, OData)
     KeepCols = Table.SelectColumns(
         Source,
         {
             "Id",
-            "DATEOFCALL","DateOfCall",       // handle both variants
-            "COMMITMENTDATE","CommitmentDate",
-            "DateOfFollowUp",
-            "AREA","DISTRICT","UNIT","Area","District","Unit",
-            "WHOSPOKE","WhoSpoke",
-            "COMMITMENTS","Commitments",
-            "INDICATOR","APRIndicator","Indicator",
-            "SERVICEINDICATOR","ServiceIndicator","ServiceIndicato",
-            "ACTIONTAKEN","ActionTaken",
-            "DaysRemaining",
-            "MPOOView","DistrictView","OfficeLevel",
-            "Status_Switch",
-            "Created","Modified"
+            "DOC", "AREA", "DISTRICT", "UNIT",
+            "WHO", "POSITION",
+            "NSI", "COMMENTS", "COMMITMENTDATE", "DateOfFollowUp",
+            "SICIndicator", "SICIndicator2", "ServiceIndicato",
+            "WhosCommitted",
+            "EscalationTier", "Status", "LastEscalated",
+            "ActionTaken",
+            "WasCommitmentAddressed", "WasEscalated", "SkipEscalationFlow",
+            "MPOO", "EmailCopy", "SentBack", "SendBackNotes",
+            "Created", "Modified"
         },
         MissingField.Ignore
     ),
 
-    // Coalesce duplicated variants (caps vs camelCase)
-    Add_DateOfCall = Table.AddColumn(KeepCols, "DateOfCall_std",
-        each if [DateOfCall]? <> null then [DateOfCall] else [DATEOFCALL]?),
-
-    Add_CommitmentDate = Table.AddColumn(Add_DateOfCall, "CommitmentDate_std",
-        each if [CommitmentDate]? <> null then [CommitmentDate] else [COMMITMENTDATE]?),
-
-    Add_Area  = Table.AddColumn(Add_CommitmentDate, "Area_std",
-        each if [Area]? <> null then [Area] else [AREA]?),
-    Add_Dist  = Table.AddColumn(Add_Area, "District_std",
-        each if [District]? <> null then [District] else [DISTRICT]?),
-    Add_Unit  = Table.AddColumn(Add_Dist, "Unit_std",
-        each if [Unit]? <> null then [Unit] else [UNIT]?),
-
-    Add_Who   = Table.AddColumn(Add_Unit, "WhoSpoke_std",
-        each if [WhoSpoke]? <> null then [WhoSpoke] else [WHOSPOKE]?),
-
-    Add_Comm  = Table.AddColumn(Add_Who, "Commitments_std",
-        each if [Commitments]? <> null then [Commitments] else [COMMITMENTS]?),
-
-    // Indicators
-    Add_IndicatorUnified = Table.AddColumn(Add_Comm, "IndicatorUnified",
-        each if Text.FromNullable([Indicator]) <> "" then [Indicator]
-             else if Text.FromNullable([INDICATOR]) <> "" then [INDICATOR]
-             else if Text.FromNullable([APRIndicator]) <> "" then [APRIndicator]
-             else null),
-
-    Add_ServiceUnified = Table.AddColumn(Add_IndicatorUnified, "ServiceIndicatorUnified",
-        each if Text.FromNullable([ServiceIndicator]) <> "" then [ServiceIndicator]
-             else if Text.FromNullable([SERVICEINDICATOR]) <> "" then [SERVICEINDICATOR]
-             else if Text.FromNullable([ServiceIndicato]) <> "" then [ServiceIndicato]
-             else null),
-
-    Add_Action = Table.AddColumn(Add_ServiceUnified, "ActionTaken_std",
-        each if [ActionTaken]? <> null then [ActionTaken] else [ACTIONTAKEN]?),
-
-    // Select standardized set
-    SelectStd = Table.SelectColumns(
-        Add_Action,
-        {
-            "Id","DateOfCall_std","CommitmentDate_std","DateOfFollowUp",
-            "Area_std","District_std","Unit_std",
-            "WhoSpoke_std","Commitments_std",
-            "IndicatorUnified","ServiceIndicatorUnified",
-            "ActionTaken_std","DaysRemaining",
-            "MPOOView","DistrictView","OfficeLevel",
-            "Status_Switch","Created","Modified"
-        },
-        MissingField.Ignore
-    ),
-
-    // Rename + type
+    // Standardize naming
     Renamed = Table.RenameColumns(
-        SelectStd,
+        KeepCols,
         {
-            {"DateOfCall_std","DateOfCall"},
-            {"CommitmentDate_std","CommitmentDate"},
-            {"Area_std","Area"},
-            {"District_std","District"},
-            {"Unit_std","Unit"},
-            {"WhoSpoke_std","WhoSpoke"},
-            {"Commitments_std","Commitments"},
-            {"ActionTaken_std","ActionTaken"}
+            {"DOC","DateOfCall"},
+            {"WHO","WhoSpoke"},
+            {"COMMENTS","Commitments"},
+            {"SICIndicator","Indicator"},
+            {"SICIndicator2","IndicatorAlt"},
+            {"ServiceIndicato","ServiceIndicator"},
+            {"EscalationTier","Tier"},
+            {"Status","Status_Switch"},
+            {"MPOO","MPOOView"}
         },
         MissingField.Ignore
     ),
 
-    Typed = Table.TransformColumnTypes(
+    // Coalesce indicators into a single "IndicatorUnified"
+    AddIndicatorUnified = Table.AddColumn(
         Renamed,
+        "IndicatorUnified",
+        each if Text.FromNullable([Indicator]) <> "" then [Indicator]
+             else if Text.FromNullable([IndicatorAlt]) <> "" then [IndicatorAlt]
+             else null
+    ),
+
+    // Type cleanup
+    Typed = Table.TransformColumnTypes(
+        AddIndicatorUnified,
         {
             {"Id", Int64.Type},
             {"DateOfCall", type datetime},
-            {"CommitmentDate", type datetime},
+            {"COMMITMENTDATE", type datetime},
             {"DateOfFollowUp", type datetime},
-            {"Area", type text},
-            {"District", type text},
-            {"Unit", type text},
+            {"Area", type text}, {"AREA", type text},
+            {"District", type text}, {"DISTRICT", type text},
+            {"Unit", type text}, {"UNIT", type text},
             {"WhoSpoke", type text},
             {"Commitments", type text},
             {"IndicatorUnified", type text},
-            {"ServiceIndicatorUnified", type text},
+            {"ServiceIndicator", type text},
             {"ActionTaken", type text},
-            {"DaysRemaining", Int64.Type},
-            {"MPOOView", type text},
-            {"DistrictView", type text},
-            {"OfficeLevel", type text},
+            {"Tier", type text},
             {"Status_Switch", type text},
+            {"MPOOView", type text},
             {"Created", type datetime},
             {"Modified", type datetime}
         },
         "en-US"
     ),
 
-    WithListType = Table.AddColumn(Typed, "ListType", each "SIC", type text),
-
-    SIC_Normalized = Table.SelectColumns(
-        WithListType,
+    // Final select (align schema with APR)
+    FinalSelect = Table.SelectColumns(
+        Typed,
         {
-            "ListType","Id","DateOfCall","CommitmentDate","DateOfFollowUp",
-            "Area","District","Unit",
+            "Id","DateOfCall","COMMITMENTDATE","DateOfFollowUp",
+            "AREA","DISTRICT","UNIT",
             "WhoSpoke","Commitments",
-            "IndicatorUnified","ServiceIndicatorUnified",
-            "ActionTaken","DaysRemaining",
-            "MPOOView","DistrictView","OfficeLevel",
-            "Status_Switch","Created","Modified"
+            "IndicatorUnified","ServiceIndicator",
+            "ActionTaken","Tier","Status_Switch",
+            "MPOOView",
+            "Created","Modified"
         },
         MissingField.Ignore
-    )
+    ),
+
+    // Normalize column casing
+    RenamedFinal = Table.RenameColumns(
+        FinalSelect,
+        {
+            {"AREA","Area"},
+            {"DISTRICT","District"},
+            {"UNIT","Unit"},
+            {"COMMITMENTDATE","CommitmentDate"}
+        },
+        MissingField.Ignore
+    ),
+
+    WithListType = Table.AddColumn(RenamedFinal, "ListType", each "SIC", type text)
 in
-    SIC_Normalized
+    WithListType
