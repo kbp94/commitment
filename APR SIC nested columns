@@ -1,0 +1,16 @@
+let
+    Source = APR,
+    // Get types of each column
+    ColTypes = Table.Schema(Source)[{ "Name", "Kind" }],
+    // Keep only where Kind is "Record" or "Table"
+    NestedCols = Table.SelectRows(ColTypes, each [Kind] = "Record" or [Kind] = "Table")
+in
+    NestedCols
+
+
+let
+    Source = SIC,
+    ColTypes = Table.Schema(Source)[{ "Name", "Kind" }],
+    NestedCols = Table.SelectRows(ColTypes, each [Kind] = "Record" or [Kind] = "Table")
+in
+    NestedCols
