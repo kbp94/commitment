@@ -1,0 +1,7 @@
+let
+  Source = Combined,
+  Sorted = Table.Sort(Source, {{"ListType", Order.Ascending},{"Id", Order.Ascending},{"Modified", Order.Descending}}),
+  Grouped = Table.Group(Sorted, {"ListType","Id"}, {{"Top", each Table.FirstN(_,1){0}, type record}}),
+  Expanded = Table.ExpandRecordColumn(Grouped,"Top",Table.ColumnNames(Sorted))
+in
+  Expanded
