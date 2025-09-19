@@ -1,0 +1,1 @@
+CombinedVersions = Table.Combine({APR_Versions, SIC_Versions})
