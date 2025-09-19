@@ -1,5 +1,6 @@
 let
   Source = APR,
+
   Keep = Table.SelectColumns(Source,{
     "Id","DateofCall","DateofFollowUp","Area","District","Office","Unit",
     "WhoSpoke?","PersonSpeakingforSite","Commitments",
@@ -7,29 +8,53 @@ let
     "DueDate","StatusNew","NEW_LastEscalated","NEW_EscalationTier",
     "ActionTaken","MPOO","Created","Modified"
   }, MissingField.Ignore),
+
   Ren = Table.RenameColumns(Keep,{
     {"DateofCall","DateOfCall"},{"DateofFollowUp","DateOfFollowUp"},
     {"DueDate","CommitmentDate"},{"StatusNew","Status_Switch"},
     {"NEW_LastEscalated","LastEscalated"},{"NEW_EscalationTier","Tier"},
     {"MPOO","MPOOView"}
   }, MissingField.Ignore),
-  AddUnit = Table.AddColumn(Ren,"Unit", each if Record.HasFields(_, "Unit") and [Unit]<>null then [Unit] else [Office]),
-  AddWho  = Table.AddColumn(AddUnit,"WhoSpoke", each if Record.HasFields(_, "WhoSpoke?") and Text.FromNullable(Record.Field(_, "WhoSpoke?"))<>"" then Record.Field(_, "WhoSpoke?") else [PersonSpeakingforSite]),
-  AddSvc  = Table.AddColumn(AddWho,"ServiceIndicator", each if Record.HasFields(_, "ServiceIndicator") and Text.FromNullable([ServiceIndicator])<>"" then [ServiceIndicator] else if Record.HasFields(_, "ServiceIndicato") and Text.FromNullable([ServiceIndicato])<>"" then [ServiceIndicato] else null),
-  AddInd  = Table.AddColumn(AddSvc,"IndicatorUnified", each if Text.FromNullable([APRIndicator])<>"" then [APRIndicator] else null),
-  Select  = Table.SelectColumns(AddInd,{
+
+  // Avoid collisions by writing to *_std then renaming later
+  UnitStd = Table.AddColumn(Ren,"Unit_std",
+              each if Record.HasFields(_, "Unit") and [Unit] <> null then [Unit] else [Office]),
+
+  WhoStd = Table.AddColumn(UnitStd,"WhoSpoke",
+              each let w = try Record.Field(_, "WhoSpoke?") otherwise null,
+                       p = try [PersonSpeakingforSite] otherwise null
+                   in if w <> null and Text.From(w) <> "" then w else p),
+
+  SvcStd = Table.AddColumn(WhoStd,"ServiceIndicator_std",
+              each let s1 = try [ServiceIndicator] otherwise null,
+                       s2 = try [ServiceIndicato] otherwise null
+                   in if s1 <> null and Text.From(s1) <> "" then s1
+                      else if s2 <> null and Text.From(s2) <> "" then s2 else null),
+
+  IndUnified = Table.AddColumn(SvcStd,"IndicatorUnified",
+                 each let ai = try [APRIndicator] otherwise null
+                      in if ai <> null and Text.From(ai) <> "" then ai else null),
+
+  Select = Table.SelectColumns(IndUnified,{
     "Id","DateOfCall","CommitmentDate","DateOfFollowUp",
-    "Area","District","Unit","WhoSpoke","Commitments",
-    "IndicatorUnified","ServiceIndicator",
+    "Area","District","Unit_std","WhoSpoke","Commitments",
+    "IndicatorUnified","ServiceIndicator_std",
     "Tier","LastEscalated","Status_Switch","ActionTaken","MPOOView",
     "Created","Modified"
   }, MissingField.Ignore),
-  Types = Table.TransformColumnTypes(Select,{
+
+  RenameFinal = Table.RenameColumns(Select,{
+    {"Unit_std","Unit"},
+    {"ServiceIndicator_std","ServiceIndicator"}
+  }, MissingField.Ignore),
+
+  Types = Table.TransformColumnTypes(RenameFinal,{
     {"Id",Int64.Type},{"DateOfCall",type datetime},{"CommitmentDate",type datetime},{"DateOfFollowUp",type datetime},
     {"Area",type text},{"District",type text},{"Unit",type text},{"WhoSpoke",type text},{"Commitments",type text},
     {"IndicatorUnified",type text},{"ServiceIndicator",type text},{"Tier",type text},{"LastEscalated",type text},
     {"Status_Switch",type text},{"ActionTaken",type text},{"MPOOView",type text},{"Created",type datetime},{"Modified",type datetime}
   }),
+
   WithType = Table.AddColumn(Types,"ListType", each "APR", type text)
 in
   WithType
