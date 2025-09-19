@@ -1,0 +1,7 @@
+// Replace URL and ListName for each list and run separately
+let
+  Source = SharePoint.Tables("https://<tenant>.sharepoint.com/sites/<site>", [Implementation="2.0"]),
+  List   = Source{[Name="<ListName>"]}[Items],
+  Schema = Table.Schema(List)[[Name],[Kind]]
+in
+  Schema
