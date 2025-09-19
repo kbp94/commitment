@@ -1,0 +1,11 @@
+SIC_Vers = Table.ExpandTableColumn(SIC, "Versions",
+    {"VersionId","VersionLabel","Modified","Editor","FieldValuesAsText"},
+    {"VersionId","VersionLabel","VersionModified","Editor","FieldValuesAsText"});
+
+SIC_Vers_Editor = Table.ExpandRecordColumn(SIC_Vers, "Editor", {"Title","Email"}, {"EditorName","EditorEmail"});
+
+SIC_Vers_Fields = Table.ExpandRecordColumn(SIC_Vers_Editor, "FieldValuesAsText",
+    {"DOC","DateOfFollowUp","COMMITMENTDATE","AREA","DISTRICT","UNIT","WHO","COMMENTS","SICIndicator","SICIndicator2","ServiceIndicato","EscalationTier","LastEscalated","Status","MPOO"},
+    {"DOC","DateOfFollowUp","COMMITMENTDATE","AREA","DISTRICT","UNIT","WHO","COMMENTS","SICIndicator","SICIndicator2","ServiceIndicato","EscalationTier","LastEscalated","Status","MPOO"});
+
+SIC_Versions = Table.AddColumn(SIC_Vers_Fields, "ListType", each "SIC", type text)
