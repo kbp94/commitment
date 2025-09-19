@@ -1,0 +1,50 @@
+A) Top-level column names (for reference)
+let
+  SourceAPR = #"APR Call",
+  SourceSIC = #"SIC Call",
+  APRCols = Table.FromList(Table.ColumnNames(SourceAPR), Splitter.SplitByNothing(), {"APR_Columns"}),
+  SICCols = Table.FromList(Table.ColumnNames(SourceSIC), Splitter.SplitByNothing(), {"SIC_Columns"})
+in
+  [APRCols=APRCols, SICCols=SICCols]
+
+B) Nested fields inside Versions (dynamic across many rows)
+let
+  Source = #"APR Call",   // change to #"SIC Call" to inspect SIC
+  // keep rows where Versions isn’t null
+  WithVersions = Table.SelectRows(Source, each Record.HasFields(_, "Versions") and [Versions] <> null),
+  // get a few non-empty versions tables
+  SampleVers = List.FirstN(List.RemoveNulls(Table.Column(WithVersions, "Versions")), 10),
+  // each item in Versions is a table; get FieldValuesAsText record from first row(s)
+  FVANames =
+    List.Distinct(
+      List.Combine(
+        List.Transform(
+          SampleVers,
+          (tbl as table) =>
+            let rows = Table.ToRecords(tbl){0}? ?? [], rec = try rows[FieldValuesAsText] otherwise null
+            in if rec is record then Record.FieldNames(rec) else {}
+        )
+      )
+    ),
+  AsTable = Table.FromList(FVANames, Splitter.SplitByNothing(), {"FieldValuesAsText_NestedFields"})
+in
+  AsTable
+
+C) Peek a few example values per nested field (helps decide what to use)
+let
+  Source = #"APR Call",
+  Keep = Table.SelectRows(Source, each [Versions] <> null),
+  Vers = Table.ExpandTableColumn(Keep, "Versions", {"FieldValuesAsText"}, {"FVA"}),
+  // take a small sample to keep it fast
+  Sample = Table.FirstN(Vers, 50),
+  // Turn records into rows with (FieldName, Value)
+  ToPairs = Table.AddColumn(Sample, "Pairs", each Record.ToTable([FVA])),
+  Expanded = Table.ExpandTableColumn(ToPairs, "Pairs", {"Name","Value"}, {"Field","Value"}),
+  // summarize: distinct examples and non-null counts
+  Grouped = Table.Group(Expanded, {"Field"}, {
+      {"NonNullCount", each List.Count(List.RemoveNulls([Value])), Int64.Type},
+      {"Examples", each Text.Combine(List.Transform(List.FirstN(List.Distinct(List.RemoveNulls([Value])), 5), each Text.From(_)), " | "), type text}
+  }),
+  Sorted = Table.Sort(Grouped, {{"NonNullCount", Order.Descending}})
+in
+  Sorted
