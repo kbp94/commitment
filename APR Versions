@@ -1,139 +1,68 @@
 let
-  // ----- SOURCE -----
-  Source = APR,
+  Site = "https://usps365.sharepoint.com/sites/FOSAppResultsWarehouse",
+  Url  = Site & "/_api/web/lists/GetByTitle('APR Call')/items" &
+               "?$select=Id,Versions" &
+               "&$expand=Versions($select=VersionId,VersionLabel,Modified,Editor,FieldValuesAsText)" &
+               "&$format=application/json;odata=minimalmetadata",
 
-  // ----- EXPAND VERSIONS (alias inner names to avoid collisions) -----
+  Src  = OData.Feed(Url, null, [Implementation="2.0"]),
+  Keep = Table.SelectColumns(Src, {"Id","Versions"}),
+
+  // Expand Versions (alias inner names to avoid collisions)
   V1 = Table.ExpandTableColumn(
-        Source, "Versions",
+        Keep, "Versions",
         {"VersionId","VersionLabel","Modified","Editor","FieldValuesAsText"},
         {"VersionId","VersionLabel","VersionModified","EditorRec","FieldsRec"}
       ),
 
-  // ----- EXPAND EDITOR (who edited that version) -----
-  V2 = Table.ExpandRecordColumn(
-        V1, "EditorRec", {"Title","Email"}, {"EditorName","EditorEmail"}
-      ),
+  // Editor
+  V2 = Table.ExpandRecordColumn(V1, "EditorRec", {"Title","Email"}, {"EditorName","EditorEmail"}),
 
-  // ----- DROP COLUMNS THAT WILL BE RECREATED FROM SNAPSHOT -----
-  Drop = Table.RemoveColumns(
-          V2,
-          {
-            "DateofCall","DateofFollowUp","DueDate","Area","District","Office",
-            "WhoSpoke?","PersonSpeakingforSite","WhoSpoke",
-            "Commitments","APRIndicator","ServiceIndicator","ServiceIndicato",
-            "StatusNew","NEW_LastEscalated","NEW_EscalationTier","MPOO"
-          },
-          MissingField.Ignore
-        ),
-
-  // ----- EXPAND SNAPSHOT FIELDS FROM THIS VERSION -----
+  // Snapshot fields (drop collisions not needed because we only selected Id + Versions)
   V3 = Table.ExpandRecordColumn(
-        Drop, "FieldsRec",
-        {
-          "DateofCall","DateofFollowUp","DueDate",
-          "Area","District","Office",
-          "WhoSpoke?","PersonSpeakingforSite",
-          "Commitments","APRIndicator","ServiceIndicator","ServiceIndicato",
-          "StatusNew","NEW_LastEscalated","NEW_EscalationTier","MPOO"
-        },
-        {
-          "DateofCall","DateofFollowUp","DueDate",
-          "Area","District","Office",
-          "WhoSpoke?","PersonSpeakingforSite",
-          "Commitments","APRIndicator","ServiceIndicator","ServiceIndicato",
-          "StatusNew","NEW_LastEscalated","NEW_EscalationTier","MPOO"
-        }
-      ),
+        V2, "FieldsRec",
+        {"DateofCall","DateofFollowUp","DueDate","Area","District","Office","WhoSpoke?","PersonSpeakingforSite",
+         "Commitments","APRIndicator","ServiceIndicator","ServiceIndicato","StatusNew","NEW_LastEscalated","NEW_EscalationTier","MPOO"},
+        {"DateofCall","DateofFollowUp","DueDate","Area","District","Office","WhoSpoke?","PersonSpeakingforSite",
+         "Commitments","APRIndicator","ServiceIndicator","ServiceIndicato","StatusNew","NEW_LastEscalated","NEW_EscalationTier","MPOO"}),
 
-  // ----- STANDARDIZE NAMES -----
-  Ren = Table.RenameColumns(
-          V3,
-          {
-            {"DateofCall","DateOfCall"},
-            {"DateofFollowUp","DateOfFollowUp"},
-            {"DueDate","CommitmentDate"},
-            {"StatusNew","Status_Switch"},
-            {"NEW_LastEscalated","LastEscalated"},
-            {"NEW_EscalationTier","Tier"},
-            {"MPOO","MPOOView"}
-          },
-          MissingField.Ignore
-        ),
+  // Normalize
+  Ren = Table.RenameColumns(V3, {
+        {"DateofCall","DateOfCall"},
+        {"DateofFollowUp","DateOfFollowUp"},
+        {"DueDate","CommitmentDate"},
+        {"StatusNew","Status_Switch"},
+        {"NEW_LastEscalated","LastEscalated"},
+        {"NEW_EscalationTier","Tier"},
+        {"MPOO","MPOOView"}
+      }, MissingField.Ignore),
 
-  // ----- UNIT (APR uses Office) -----
-  AddUnit = Table.AddColumn(
-              Ren, "Unit",
-              each if Record.HasFields(_, "Office") and [Office] <> null then [Office] else null
-            ),
+  // Coalesce Unit, Who, Service, Indicator
+  AddUnit = Table.AddColumn(Ren, "Unit", each if [Office] <> null then [Office] else null),
+  AddWho  = Table.AddColumn(AddUnit, "WhoSpoke",
+              each let w = try Record.Field(_, "WhoSpoke?") otherwise null,
+                       p = try [PersonSpeakingforSite] otherwise null
+                   in if w <> null and Text.From(w) <> "" then w else p),
+  AddSvc  = Table.AddColumn(AddWho, "ServiceIndicator_std",
+              each if Text.FromNullable([ServiceIndicator]) <> "" then [ServiceIndicator]
+                   else if Text.FromNullable([ServiceIndicato]) <> "" then [ServiceIndicato] else null),
+  AddInd  = Table.AddColumn(AddSvc, "IndicatorUnified",
+              each if Text.FromNullable([APRIndicator]) <> "" then [APRIndicator] else null),
 
-  // Ensure no collision before adding WhoSpoke
-  DropWho = Table.RemoveColumns(AddUnit, {"WhoSpoke"}, MissingField.Ignore),
+  // Types + final shape
+  Types = Table.TransformColumnTypes(AddInd, {
+        {"VersionModified", type datetimezone},
+        {"DateOfCall", type datetime}, {"CommitmentDate", type datetime}, {"DateOfFollowUp", type datetime}
+      }, "en-US"),
 
-  // ----- WHO SPOKE (prefer WhoSpoke? else PersonSpeakingforSite) -----
-  AddWho = Table.AddColumn(
-            DropWho, "WhoSpoke",
-            each
-              let w = try Record.Field(_, "WhoSpoke?") otherwise null,
-                  p = try [PersonSpeakingforSite] otherwise null
-              in if w <> null and Text.From(w) <> "" then w else p
-          ),
+  SelectCols = Table.SelectColumns(Types, {
+        "Id","DateOfCall","CommitmentDate","DateOfFollowUp",
+        "Area","District","Unit","WhoSpoke","Commitments",
+        "IndicatorUnified","ServiceIndicator_std",
+        "Tier","LastEscalated","Status_Switch","MPOOView",
+        "VersionId","VersionLabel","VersionModified","EditorName","EditorEmail"
+      }, MissingField.Ignore),
 
-  // ----- SERVICE INDICATOR (handle truncated variant) -----
-  AddSvc = Table.AddColumn(
-            AddWho, "ServiceIndicator_std",
-            each
-              let s1 = try [ServiceIndicator] otherwise null,
-                  s2 = try [ServiceIndicato] otherwise null
-              in if s1 <> null and Text.From(s1) <> "" then s1
-                 else if s2 <> null and Text.From(s2) <> "" then s2
-                 else null
-          ),
-
-  // ----- INDICATOR (APRIndicator) -----
-  AddInd = Table.AddColumn(
-            AddSvc, "IndicatorUnified",
-            each let ai = try [APRIndicator] otherwise null
-                 in if ai <> null and Text.From(ai) <> "" then ai else null
-          ),
-
-  // ----- TYPES -----
-  Types = Table.TransformColumnTypes(
-            AddInd,
-            {
-              {"VersionModified", type datetimezone},
-              {"DateOfCall", type datetime},
-              {"CommitmentDate", type datetime},
-              {"DateOfFollowUp", type datetime},
-              {"Area", type text}, {"District", type text}, {"Unit", type text},
-              {"WhoSpoke", type text}, {"Commitments", type text},
-              {"IndicatorUnified", type text}, {"ServiceIndicator_std", type text},
-              {"Tier", type text}, {"LastEscalated", type text},
-              {"Status_Switch", type text}, {"MPOOView", type text}
-            },
-            "en-US"
-          ),
-
-  // ----- FINAL SHAPE -----
-  SelectCols = Table.SelectColumns(
-                Types,
-                {
-                  "Id","DateOfCall","CommitmentDate","DateOfFollowUp",
-                  "Area","District","Unit","WhoSpoke","Commitments",
-                  "IndicatorUnified","ServiceIndicator_std",
-                  "Tier","LastEscalated","Status_Switch","MPOOView",
-                  "VersionId","VersionLabel","VersionModified","EditorName","EditorEmail"
-                },
-                MissingField.Ignore
-              ),
-
-  // Rename std -> final
-  RenameFinal = Table.RenameColumns(
-                  SelectCols,
-                  {{"ServiceIndicator_std","ServiceIndicator"}},
-                  MissingField.Ignore
-                ),
-
-  // Tag list type
-  Final = Table.AddColumn(RenameFinal, "ListType", each "APR", type text)
+  Final = Table.RenameColumns(SelectCols, {{"ServiceIndicator_std","ServiceIndicator"}})
 in
   Final
