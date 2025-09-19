@@ -1,0 +1,5 @@
+let
+    Combined = Table.Combine({APR_Staging, SIC_Staging}),
+    Reordered = Table.ReorderColumns(Combined, {"CallType","Area","District","DateOfCall","DateOfFollowUp","Comments"})
+in
+    Reordered
