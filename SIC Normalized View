@@ -1,103 +1,32 @@
 let
-    Source = SIC_Call,
-
-    // Keep only the useful business fields (ignore system junk like GUID, OData)
-    KeepCols = Table.SelectColumns(
-        Source,
-        {
-            "Id",
-            "DOC", "AREA", "DISTRICT", "UNIT",
-            "WHO", "POSITION",
-            "NSI", "COMMENTS", "COMMITMENTDATE", "DateOfFollowUp",
-            "SICIndicator", "SICIndicator2", "ServiceIndicato",
-            "WhosCommitted",
-            "EscalationTier", "Status", "LastEscalated",
-            "ActionTaken",
-            "WasCommitmentAddressed", "WasEscalated", "SkipEscalationFlow",
-            "MPOO", "EmailCopy", "SentBack", "SendBackNotes",
-            "Created", "Modified"
-        },
-        MissingField.Ignore
-    ),
-
-    // Standardize naming
-    Renamed = Table.RenameColumns(
-        KeepCols,
-        {
-            {"DOC","DateOfCall"},
-            {"WHO","WhoSpoke"},
-            {"COMMENTS","Commitments"},
-            {"SICIndicator","Indicator"},
-            {"SICIndicator2","IndicatorAlt"},
-            {"ServiceIndicato","ServiceIndicator"},
-            {"EscalationTier","Tier"},
-            {"Status","Status_Switch"},
-            {"MPOO","MPOOView"}
-        },
-        MissingField.Ignore
-    ),
-
-    // Coalesce indicators into a single "IndicatorUnified"
-    AddIndicatorUnified = Table.AddColumn(
-        Renamed,
-        "IndicatorUnified",
-        each if Text.FromNullable([Indicator]) <> "" then [Indicator]
-             else if Text.FromNullable([IndicatorAlt]) <> "" then [IndicatorAlt]
-             else null
-    ),
-
-    // Type cleanup
-    Typed = Table.TransformColumnTypes(
-        AddIndicatorUnified,
-        {
-            {"Id", Int64.Type},
-            {"DateOfCall", type datetime},
-            {"COMMITMENTDATE", type datetime},
-            {"DateOfFollowUp", type datetime},
-            {"Area", type text}, {"AREA", type text},
-            {"District", type text}, {"DISTRICT", type text},
-            {"Unit", type text}, {"UNIT", type text},
-            {"WhoSpoke", type text},
-            {"Commitments", type text},
-            {"IndicatorUnified", type text},
-            {"ServiceIndicator", type text},
-            {"ActionTaken", type text},
-            {"Tier", type text},
-            {"Status_Switch", type text},
-            {"MPOOView", type text},
-            {"Created", type datetime},
-            {"Modified", type datetime}
-        },
-        "en-US"
-    ),
-
-    // Final select (align schema with APR)
-    FinalSelect = Table.SelectColumns(
-        Typed,
-        {
-            "Id","DateOfCall","COMMITMENTDATE","DateOfFollowUp",
-            "AREA","DISTRICT","UNIT",
-            "WhoSpoke","Commitments",
-            "IndicatorUnified","ServiceIndicator",
-            "ActionTaken","Tier","Status_Switch",
-            "MPOOView",
-            "Created","Modified"
-        },
-        MissingField.Ignore
-    ),
-
-    // Normalize column casing
-    RenamedFinal = Table.RenameColumns(
-        FinalSelect,
-        {
-            {"AREA","Area"},
-            {"DISTRICT","District"},
-            {"UNIT","Unit"},
-            {"COMMITMENTDATE","CommitmentDate"}
-        },
-        MissingField.Ignore
-    ),
-
-    WithListType = Table.AddColumn(RenamedFinal, "ListType", each "SIC", type text)
+  Source = SIC,
+  Keep = Table.SelectColumns(Source,{
+    "Id","DOC","DateOfFollowUp","AREA","DISTRICT","UNIT","WHO","COMMENTS",
+    "SICIndicator","SICIndicator2","ServiceIndicato","COMMITMENTDATE",
+    "EscalationTier","LastEscalated","Status","ActionTaken","MPOO",
+    "Created","Modified"
+  }, MissingField.Ignore),
+  Ren = Table.RenameColumns(Keep,{
+    {"DOC","DateOfCall"},{"COMMITMENTDATE","CommitmentDate"},
+    {"AREA","Area"},{"DISTRICT","District"},{"UNIT","Unit"},
+    {"WHO","WhoSpoke"},{"COMMENTS","Commitments"},
+    {"ServiceIndicato","ServiceIndicator"},{"EscalationTier","Tier"},
+    {"Status","Status_Switch"},{"MPOO","MPOOView"}
+  }, MissingField.Ignore),
+  AddInd = Table.AddColumn(Ren,"IndicatorUnified", each if Text.FromNullable([SICIndicator])<>"" then [SICIndicator] else if Text.FromNullable([SICIndicator2])<>"" then [SICIndicator2] else null),
+  Select = Table.SelectColumns(AddInd,{
+    "Id","DateOfCall","CommitmentDate","DateOfFollowUp",
+    "Area","District","Unit","WhoSpoke","Commitments",
+    "IndicatorUnified","ServiceIndicator",
+    "Tier","LastEscalated","Status_Switch","ActionTaken","MPOOView",
+    "Created","Modified"
+  }, MissingField.Ignore),
+  Types = Table.TransformColumnTypes(Select,{
+    {"Id",Int64.Type},{"DateOfCall",type datetime},{"CommitmentDate",type datetime},{"DateOfFollowUp",type datetime},
+    {"Area",type text},{"District",type text},{"Unit",type text},{"WhoSpoke",type text},{"Commitments",type text},
+    {"IndicatorUnified",type text},{"ServiceIndicator",type text},{"Tier",type text},{"LastEscalated",type text},
+    {"Status_Switch",type text},{"ActionTaken",type text},{"MPOOView",type text},{"Created",type datetime},{"Modified",type datetime}
+  }),
+  WithType = Table.AddColumn(Types,"ListType", each "SIC", type text)
 in
-    WithListType
+  WithType
