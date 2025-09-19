@@ -1,22 +1,36 @@
-(let
-    Source as table,
-    optionalMapping as nullable table
-) as table =>
+// Function: renames columns using a mapping table (FromName -> ToName), case-insensitive.
+// Usage: fnApplyColumnMap(MyTable)  OR  fnApplyColumnMap(MyTable, MyCustomMappingTable)
+(fn as table, optional mapping as nullable table) as table =>
 let
-    // Use provided mapping table (ColumnMappings) if none passed
-    MappingTable = if optionalMapping <> null then optionalMapping else ColumnMappings,
+    // 1) Pick mapping table: use provided one if passed, otherwise a query named ColumnMappings
+    MappingTable =
+        if mapping <> null then
+            mapping
+        else
+            ColumnMappings,
 
-    // Build a record: normalized FromName -> ToName
-    Normalized = Table.TransformColumns(
-        MappingTable,
-        {{"FromName", each Text.Lower(Text.Trim(_)), type text}}
-    ),
-    MapRecord = Record.FromTable(Table.RenameColumns(Normalized, {{"FromName","Name"}})[[Name=Key, ToName=Value]]),
+    // 2) Normalize: trim & lowercase FromName so we can match case-insensitively
+    Normalized =
+        Table.TransformColumns(
+            MappingTable,
+            {{"FromName", each Text.Lower(Text.Trim(_)), type text}}
+        ),
 
-    // Safe renamer: if a name isn't in the map, keep it as-is
-    Renamed = Table.TransformColumnNames(
-        Source,
-        each Record.FieldOrDefault(MapRecord, Text.Lower(Text.Trim(_)), _)
-    )
+    // 3) Build a [Name, Value] table for Record.FromTable
+    NameValue =
+        Table.FromColumns(
+            { Normalized[FromName], Normalized[ToName] },
+            {"Name", "Value"}
+        ),
+
+    // 4) Mapping record: "fromname_lower" -> "ToName"
+    MapRecord = Record.FromTable(NameValue),
+
+    // 5) Apply mapping: if a column isn't in the map, keep it as-is
+    Renamed =
+        Table.TransformColumnNames(
+            fn,
+            each Record.FieldOrDefault(MapRecord, Text.Lower(Text.Trim(_)), _)
+        )
 in
-    Renamed)
+    Renamed
