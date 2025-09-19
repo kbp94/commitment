@@ -1,0 +1,28 @@
+combined lists
+
+AREA	DISTRICT	UNIT	CALL TYPE	COMMITMENT DATE	DATE OF FOLLOWUP	DATE OF CALL	TIER	LAST ESCALATED	MODIFIED DATE	MPOO	INDICATOR	STATUS	WAS COMMITMENT ADDRESSED	MODIFIED BY	WHO FOLLOWED UP	WHO SPOKE	COMMITMENTS	ACTION TAKEN	SERVICE INDICATOR	APR INDICATOR	Index	Days_Remaining	Indicator_Switch	DISTRICT View	MPOO View	Office_Level	Status_Switch
+
+AREA	DISTRICT	UNIT	CALL TYPE	COMMITMENT DATE	DATE OF FOLLOWUP	DATE OF CALL	TIER	LAST ESCALATED	MODIFIED DATE	MPOO	INDICATOR	STATUS	WAS COMMITMENT ADDRESSED	MODIFIED BY	WHO FOLLOWED UP	WHO SPOKE	COMMITMENTS	ACTION TAKEN	SERVICE INDICATOR	APR INDICATOR	Index	Days_Remaining	Indicator_Switch	DISTRICT View	MPOO View	Office_Level	Status_Switch
+ATLANTIC	NEW YORK 1	CANARSIE STATION	SIC Call	09/30/25		08/13/25	1		10-Sep-25	K	Last Mile/Leg 3 - Sampling Compliance	Completed		Tyrone Williams		Adela Livingston	Derek Kelly Committed to get Unit to 90%				0	11	Leg 3 Sampling Comp.	ATLANTIC | NEW YORK 1	ATLANTIC | NEW YORK 1 | K	Yes	
+ATLANTIC	DE-PA 2		SIC Call	09/19/25		08/13/25	1		10-Sep-25	A	Last Mile/Leg 3 - Sampling Compliance	Completed		Tyrone Williams		Roman King	Get MPOO A group to 90% leg 3 sampling compliance				1	0	Leg 3 Sampling Comp.	ATLANTIC | DE-PA 2	ATLANTIC | DE-PA 2 | A	No	
+CENTRAL	MN-ND		SIC Call	08/29/25		08/13/25	3	9/8/2025 7:00:00 AM	9-Sep-25	A	Last Mile/Leg 3 - Sampling Compliance	Completed	No	Craig Lally	Angela Bye	Kenneth Johnson	Get MPOO Group to 90% sampling compliance	Coach And Retrain			2	-21	Leg 3 Sampling Comp.	CENTRAL | MN-ND	CENTRAL | MN-ND | A	No	
+
+
+apr call
+DATE OF CALL	AREA	DISTRICT	UNIT	INDICATOR	COMMITMENTS	COMMITMENT DATE	DATE OF FOLLOWUP	APR INDICATOR	SERVICE INDICATOR	STATUS	LAST ESCALATED	TIER	CALL TYPE	WAS COMMITMENT ADDRESSED	ACTION TAKEN	MPOO	MODIFIED DATE	WHO SPOKE	DaysRemaining	MPOO View	District View	MODIFIED BY
+
+DATE OF CALL	AREA	DISTRICT	UNIT	INDICATOR	COMMITMENTS	COMMITMENT DATE	DATE OF FOLLOWUP	APR INDICATOR	SERVICE INDICATOR	STATUS	LAST ESCALATED	TIER	CALL TYPE	WAS COMMITMENT ADDRESSED	ACTION TAKEN	MPOO	MODIFIED DATE	WHO SPOKE	DaysRemaining	MPOO View	District View	MODIFIED BY
+9/11/2025	CENTRAL	KY-WV	PAW PAW MAIN OFFICE	Misleading/False Scanning	95 parcels addressed for street delivery were scanned as Available for Pickup (Code 14) by employees at the 25434 - PAW PAW.	18-Sep-25	9/16/2025 7:00:00 AM			Completed	9/11/2025 10:05:21 PM	1	Rapid Response	Yes	Written Counseling	I	9/16/2025 12:33:49 PM	George Smith	-1	CENTRAL | KY-WV | I	CENTRAL | KY-WV	Anna Zane
+9/11/2025	ATLANTIC	ME-NH-VT	AUBURN ME  MAIN OFFICE	Misleading/False Scanning	Thursday evening, over 75 parcels were scanned as Return to Post Office for Address Verification (Code 70) by employees at the 04210 - AUBURN PO. These scans were recorded for multiple residential addresses.	18-Sep-25	9/12/2025 7:00:00 AM			Completed	9/12/2025 7:00:00 AM	1	Rapid Response	Yes	Formal Accountability	B	9/14/2025 5:13:50 AM	Anthony Micena	-1	ATLANTIC | ME-NH-VT | B	ATLANTIC | ME-NH-VT	Breanne Ford
+9/11/2025	SOUTHERN	AL-MS	HAYSLAND BRANCH OFFICE	Misleading/False Scanning	Over 65 parcels were scanned as Customer Hold (Code 52) by employees at the 35802 - HAYSLAND STATION. This is the 5th time this year they have been flagged for potential scanning integrity issues in the past year.	18-Sep-25	9/12/2025 7:00:00 AM			Completed	9/12/2025 7:00:00 AM	1	Rapid Response	Yes	Formal Accountability	H	9/14/2025 5:13:48 AM	Ronald Cole	-1	SOUTHERN | AL-MS | H	SOUTHERN | AL-MS	Anna Zane
+
+
+
+
+sic call
+DATE OF CALL	AREA	DISTRICT	UNIT	COMMITMENTS	COMMITMENT DATE	INDICATOR	TIER	STATUS	LAST ESCALATED	CALL TYPE	ACTION TAKEN	DATE OF FOLLOWUP	WAS COMMITMENT ADDRESSED	MODIFIED DATE	DaysRemaining	SICIndicatorSwitch	StatusSwitch	GoalLevel	MPOO	DISTRICT View	MODIFIED BY	WHO FOLLOWED UP	WHO SPOKE
+
+AREA	DISTRICT	UNIT	COMMITMENTS	COMMITMENT DATE	INDICATOR	TIER	STATUS	LAST ESCALATED	CALL TYPE	ACTION TAKEN	DATE OF FOLLOWUP	WAS COMMITMENT ADDRESSED	MODIFIED DATE	DaysRemaining	SICIndicatorSwitch	StatusSwitch	GoalLevel	MPOO	DISTRICT View	MODIFIED BY	WHO FOLLOWED UP	WHO SPOKE
+ATLANTIC	NEW YORK 1	CANARSIE STATION	Derek Kelly Committed to get Unit to 90%	09/30/25	Last Mile/Leg 3 - Sampling Compliance	1	Completed		SIC Call				9/10/2025 8:53:08 PM	11	Leg 3 Sampling		Yes	K	ATLANTIC | NEW YORK 1	Tyrone Williams		Adela Livingston
+ATLANTIC	DE-PA 2		Get MPOO A group to 90% leg 3 sampling compliance	09/19/25	Last Mile/Leg 3 - Sampling Compliance	1	Completed		SIC Call				9/10/2025 8:18:06 PM	0	Leg 3 Sampling		No	A	ATLANTIC | DE-PA 2	Tyrone Williams		Roman King
+CENTRAL	MN-ND		Get MPOO Group to 90% sampling compliance	08/29/25	Last Mile/Leg 3 - Sampling Compliance	3	Completed	9/8/2025 7:00:00 AM	SIC Call	Coach And Retrain		No	9/9/2025 6:47:35 PM	-21	Leg 3 Sampling		No	A	CENTRAL | MN-ND	Craig Lally	Angela Bye	Kenneth Johnson
