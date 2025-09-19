@@ -1,144 +1,144 @@
 APR
-ColumnName
-FileSystemObjectType
-Id
-ServerRedirectedEmbedUri
-ServerRedirectedEmbedUrl
-ContentTypeId
-Title
-OData__ColorTag
-ComplianceAssetId
-DateofCall
-Area
-District
-Office
-PersonSpeakingforSite
-NationalSummaryIndicatorImpact
-Commitments
-Comments
-Corrected?
-DateofFollowUp
-WhoSpoke?
-CURRENT_USER_TYPING
-CURRENT_USER_DROPDOWNS
-APRIndicator
-ServiceIndicator
-Description
-ResponsiblePartyId
-ResponsiblePartyStringId
-DueDate
-Notes
-EvidenceLink
-StatusNew
-NEW_LastEscalated
-NEW_EscalationTier
-WhoFollowedUpId
-WhoFollowedUpStringId
-CallType
-WasCommitmentAddressed
-ActionTaken
-EscalatedWas
-WhoSpokeId
-WhoSpokeStringId
-SkipEscalationFlow
-MPOO
-EmailSent
-SendBackNotes
-SentBack
-ID.1
-Modified
-Created
-AuthorId
-EditorId
-OData__UIVersionString
-Attachments
-GUID
-FirstUniqueAncestorSecurableObject
-RoleAssignments
-AttachmentFiles
-ContentType
-GetDlpPolicyTip
-FieldValuesAsHtml
-FieldValuesAsText
-FieldValuesForEdit
-File
-Folder
-LikedByInformation
-ParentList
-Properties
-Versions
-ResponsibleParty
-WhoFollowedUp
-WhoSpoke
-Author
-Editor
+Name	Kind
+FileSystemObjectType	any
+Id	any
+ServerRedirectedEmbedUri	any
+ServerRedirectedEmbedUrl	any
+ContentTypeId	any
+Title	any
+OData__ColorTag	any
+ComplianceAssetId	any
+DateofCall	any
+Area	any
+District	any
+Office	any
+PersonSpeakingforSite	any
+NationalSummaryIndicatorImpact	any
+Commitments	any
+Comments	any
+Corrected?	any
+DateofFollowUp	any
+WhoSpoke?	any
+CURRENT_USER_TYPING	any
+CURRENT_USER_DROPDOWNS	any
+APRIndicator	any
+ServiceIndicator	any
+Description	any
+ResponsiblePartyId	any
+ResponsiblePartyStringId	any
+DueDate	any
+Notes	any
+EvidenceLink	any
+StatusNew	any
+NEW_LastEscalated	any
+NEW_EscalationTier	any
+WhoFollowedUpId	any
+WhoFollowedUpStringId	any
+CallType	any
+WasCommitmentAddressed	any
+ActionTaken	any
+EscalatedWas	any
+WhoSpokeId	any
+WhoSpokeStringId	any
+SkipEscalationFlow	any
+MPOO	any
+EmailSent	any
+SendBackNotes	any
+SentBack	any
+ID.1	any
+Modified	any
+Created	any
+AuthorId	any
+EditorId	any
+OData__UIVersionString	any
+Attachments	any
+GUID	any
+FirstUniqueAncestorSecurableObject	record
+RoleAssignments	table
+AttachmentFiles	table
+ContentType	record
+GetDlpPolicyTip	record
+FieldValuesAsHtml	record
+FieldValuesAsText	record
+FieldValuesForEdit	record
+File	record
+Folder	record
+LikedByInformation	record
+ParentList	record
+Properties	record
+Versions	table
+ResponsibleParty	record
+WhoFollowedUp	record
+WhoSpoke	record
+Author	record
+Editor	record
 
 
 
 SIC
-ColumnName
-FileSystemObjectType
-Id
-ServerRedirectedEmbedUri
-ServerRedirectedEmbedUrl
-ContentTypeId
-Title
-OData__ColorTag
-ComplianceAssetId
-DOC
-AREA
-DISTRICT
-UNIT
-WHO
-POSITION
-NSI
-COMMENTS
-COMMITMENTDATE
-ServiceIndicato
-SICIndicator
-WhosCommitted
-SICIndicator2
-EscalationTier
-Status
-LastEscalated
-WhoSpokeId
-WhoSpokeStringId
-CALLTYPE
-ActionTaken
-DateOfFollowUp
-WhoFollowedUpId
-WhoFollowedUpStringId
-WasCommitmentAddressed
-WasEscalated
-SkipEscalationFlow
-EmailSent
-MPOO
-EmailCopy
-SentBack
-SendBackNotes
-ID.1
-Modified
-Created
-AuthorId
-EditorId
-OData__UIVersionString
-Attachments
-GUID
-FirstUniqueAncestorSecurableObject
-RoleAssignments
-AttachmentFiles
-ContentType
-GetDlpPolicyTip
-FieldValuesAsHtml
-FieldValuesAsText
-FieldValuesForEdit
-File
-Folder
-LikedByInformation
-ParentList
-Properties
-Versions
-WhoSpoke
-WhoFollowedUp
-Author
-Editor
+Name	Kind
+FileSystemObjectType	any
+Id	any
+ServerRedirectedEmbedUri	any
+ServerRedirectedEmbedUrl	any
+ContentTypeId	any
+Title	any
+OData__ColorTag	any
+ComplianceAssetId	any
+DOC	any
+AREA	any
+DISTRICT	any
+UNIT	any
+WHO	any
+POSITION	any
+NSI	any
+COMMENTS	any
+COMMITMENTDATE	any
+ServiceIndicato	any
+SICIndicator	any
+WhosCommitted	any
+SICIndicator2	any
+EscalationTier	any
+Status	any
+LastEscalated	any
+WhoSpokeId	any
+WhoSpokeStringId	any
+CALLTYPE	any
+ActionTaken	any
+DateOfFollowUp	any
+WhoFollowedUpId	any
+WhoFollowedUpStringId	any
+WasCommitmentAddressed	any
+WasEscalated	any
+SkipEscalationFlow	any
+EmailSent	any
+MPOO	any
+EmailCopy	any
+SentBack	any
+SendBackNotes	any
+ID.1	any
+Modified	any
+Created	any
+AuthorId	any
+EditorId	any
+OData__UIVersionString	any
+Attachments	any
+GUID	any
+FirstUniqueAncestorSecurableObject	record
+RoleAssignments	table
+AttachmentFiles	table
+ContentType	record
+GetDlpPolicyTip	record
+FieldValuesAsHtml	record
+FieldValuesAsText	record
+FieldValuesForEdit	record
+File	record
+Folder	record
+LikedByInformation	record
+ParentList	record
+Properties	record
+Versions	table
+WhoSpoke	record
+WhoFollowedUp	record
+Author	record
+Editor	record
