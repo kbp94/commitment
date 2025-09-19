@@ -1,6 +1,8 @@
-DataSource.Error: We couldn't parse OData response result.  Error: A value without a type name was found and no expected type is available. When the model is specified, each value in the payload must have a type which can be either specified in the payload, explicitly by the caller or implicitly inferred from the parent value.
+DataSource.Error: Microsoft.Mashup.Engine1.Library.Resources.HttpResource: Request failed: 
+OData Version: 3 and 4, Error: The remote server returned an error: (400) Bad Request. (The expression "Versions($select=VersionId,VersionLabel,Modified,Editor,FieldValuesAsText)" is not valid.)
+OData Version: 4, Error: The remote server returned an error: (400) Bad Request. (The expression "Versions($select=VersionId,VersionLabel,Modified,Editor,FieldValuesAsText)" is not valid.)
+OData Version: 3, Error: The remote server returned an error: (400) Bad Request. (The expression "Versions($select=VersionId,VersionLabel,Modified,Editor,FieldValuesAsText)" is not valid.)
 Details:
-    DataSourceKind=SharePoint
-    DataSourcePath=https://usps365.sharepoint.com/sites/FOSAppResultsWarehouse
-    DataSourceKind.2=SharePoint
-    DataSourcePath.2=https://usps365.sharepoint.com/sites/FOSAppResultsWarehouse/_api/Web/Lists(guid'8512355f-5c42-4aab-ab94-0a15a5cb14dc')/Items(59)/Versions
+    DataSourceKind=OData
+    DataSourcePath=https://usps365.sharepoint.com/sites/FOSAppResultsWarehouse/_api/web/lists/GetByTitle('APR%20Call')/items
+    sprequestguid=485dc7a1-70da-9000-ba27-f672092c06a5, 485dc7a1-e0e1-a000-4416-3212569a19c4, 485dc7a1-b0e8-a000-3173-cf4314d5b99a
