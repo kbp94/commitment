@@ -10,9 +10,21 @@ let
         {"NSI", "NationalSummaryIndicatorImpact"},
         {"WHO", "PersonSpeakingforSite"},
         {"WhosCommitted", "ResponsibleParty"},
-        {"SICIndicator2", "SICIndicator"}
+        {"SICIndicator2", "SICIndicatorSecondary"},
+        {"DOC", "DateOfCall"},
+        {"UNIT", "Office"},
+        {"Status", "Status"},
+        {"LastEscalated", "LastEscalated"},
+        {"CALLTYPE", "CallType"},
+        {"OData__UIVersionString", "UIVersionString"}
     }, MissingField.Ignore),
-    APRCallRenamed = Table.RenameColumns(APRCall, {}, MissingField.Ignore),
+    APRCallRenamed = Table.RenameColumns(APRCall, {
+        {"DateofFollowUp", "DateOfFollowUp"},
+        {"EscalatedWas", "WasEscalated"},
+        {"StatusNew", "Status"},
+        {"NEW_LastEscalated", "LastEscalated"},
+        {"OData__UIVersionString", "UIVersionString"}
+    }, MissingField.Ignore),
     SICCallWithSource = Table.AddColumn(SICCallRenamed, "Source", each "SIC", type text),
     APRCallWithSource = Table.AddColumn(APRCallRenamed, "Source", each "APR", type text),
     CombinedTable = Table.Combine({SICCallWithSource, APRCallWithSource})
