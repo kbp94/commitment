@@ -1,0 +1,7 @@
+let
+    Source = YourSICCallTable, // Replace with SIC Call table
+    ExpandedVersions = Table.ExpandTableColumn(Source, "Versions", 
+        {"Modified", "AuthorId", "EditorId", "OData__UIVersionString"}, 
+        {"Version.Modified", "Version.AuthorId", "Version.EditorId", "Version.UIVersionString"})
+in
+    ExpandedVersions
