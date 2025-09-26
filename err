@@ -2,4 +2,4 @@ DataSource.Error: Value cannot be null.
 Parameter name: entitySet
 Details:
     DataSourceKind=OData
-    DataSourcePath=https://usps365.sharepoint.com/sites/FOSAppResultsWarehouse/_api/web/lists/GetByTitle('APR%20Call')/items
+    DataSourcePath=https://usps365.sharepoint.com/sites/FOSAppResultsWarehouse/_api/web/lists/getbytitle('SIC%20Call')/items
