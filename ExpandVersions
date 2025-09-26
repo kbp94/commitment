@@ -1,15 +1,13 @@
 let
     Source = YourSICCallTable, // Replace with SIC Call table
-    // Filter out rows with null or invalid Versions
-    FilterValidVersions = Table.SelectRows(Source, each [Versions] <> null and [Versions] <> ""),
-    // Expand Versions with error handling
+    SetTableType = Table.TransformColumnTypes(Source, {{"Versions", type table}}, "en-US"),
+    FilterValidVersions = Table.SelectRows(SetTableType, each [Versions] <> null and [Versions] <> ""),
     ExpandedVersions = Table.ExpandTableColumn(
         FilterValidVersions,
         "Versions",
         {"Modified", "AuthorId", "EditorId", "OData__UIVersionString"},
         {"Version.Modified", "Version.AuthorId", "Version.EditorId", "Version.UIVersionString"}
     ),
-    // Replace nulls or errors with defaults
     HandleErrors = Table.ReplaceErrorValues(ExpandedVersions, {
         {"Version.Modified", null},
         {"Version.AuthorId", null},
