@@ -1,0 +1,20 @@
+let
+    SICCall = YourSICCallTable, // Replace with SIC Call table
+    APRCall = YourAPRCallTable, // Replace with APR Call table
+    SICCallRenamed = Table.RenameColumns(SICCall, {
+        {"AREA", "Area"},
+        {"DISTRICT", "District"},
+        {"COMMITMENTDATE", "DueDate"},
+        {"ServiceIndicato", "ServiceIndicator"},
+        {"COMMENTS", "Comments"},
+        {"NSI", "NationalSummaryIndicatorImpact"},
+        {"WHO", "PersonSpeakingforSite"},
+        {"WhosCommitted", "ResponsibleParty"},
+        {"SICIndicator2", "SICIndicator"}
+    }, MissingField.Ignore),
+    APRCallRenamed = Table.RenameColumns(APRCall, {}, MissingField.Ignore),
+    SICCallWithSource = Table.AddColumn(SICCallRenamed, "Source", each "SIC", type text),
+    APRCallWithSource = Table.AddColumn(APRCallRenamed, "Source", each "APR", type text),
+    CombinedTable = Table.Combine({SICCallWithSource, APRCallWithSource})
+in
+    CombinedTable
