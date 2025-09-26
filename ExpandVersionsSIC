@@ -1,0 +1,12 @@
+let
+    Source = OData.Feed("https://your-site.sharepoint.com/_api/web/lists/getbytitle('SIC Call')/items?$expand=Versions", null, [Implementation="2.0"]),
+    // Remove null or empty rows
+    FilterValidRows = Table.SelectRows(Source, each [Id] <> null and [Versions] <> null and [Versions] <> ""),
+    // Set Versions to Table type
+    SetTableType = Table.TransformColumnTypes(FilterValidRows, {{"Versions", type table}}, "en-US"),
+    // Check if Versions has data
+    CheckVersions = Table.AddColumn(SetTableType, "VersionsCount", each if [Versions] = null then 0 else Table.RowCount([Versions]), type number),
+    // Filter rows with valid Versions
+    FilterNonEmptyVersions = Table.SelectRows(CheckVersions, each [VersionsCount] > 0)
+in
+    FilterNonEmptyVersions
